@@ -8,7 +8,7 @@ install_requires = [
 
 setup(
         name = 'sheety',
-        version = '0.2',
+        version = '0.2.1',
         author = 'James',
         packages = find_packages(),
         install_requires = install_requires,

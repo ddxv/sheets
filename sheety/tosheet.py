@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
@@ -23,6 +24,11 @@ from python:
 from R:
     system(paste(PY_EXECUTABLE, TO_SHEET_SCRIPT, my_file_path, spreadsheet_name, worksheet_name, additional_cols))
 """
+
+def clean(my_df):
+    my_df.replace([np.inf, -np.inf], 'inf', inplace = True)
+    my_df.replace([np.nan], 'nan', inplace = True)
+    return(my_df)
 
 
 def ensure_sheetname(client, my_spreadsheet, sheetname):
@@ -60,6 +66,7 @@ def insert_range(my_df, target_sheet):
 
 def insert_df(df, dest_spreadsheet, dest_sheetname, extra_cols):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    df = clean(df)
     creds = ServiceAccountCredentials.from_json_keyfile_name(client_secret_path, scope)
     client = gspread.authorize(creds)
     ensure_sheetname(client, dest_spreadsheet, dest_sheetname)
@@ -71,7 +78,7 @@ def insert_df(df, dest_spreadsheet, dest_sheetname, extra_cols):
 
 
 home = str(Path.home())
-client_secret_path = home +'/auth/sheety-credentials.json'
+client_secret_path = home +'/sheety/sheety-credentials.json'
 
 
 if __name__ == "__main__":
@@ -86,5 +93,6 @@ if __name__ == "__main__":
         extra_cols = int(sys.argv[4])
     else:
         extra_cols = 0
+    df = df.fillna('nan')
     insert_df(df, my_spreadsheet, sheet_name, extra_cols)
 
